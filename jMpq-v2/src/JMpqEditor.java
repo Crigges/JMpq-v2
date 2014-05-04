@@ -1,10 +1,13 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.util.Arrays;
 
 public class JMpqEditor {
+	private final static BigInteger hashkey = new BigInteger("C3AF3770", 16);
+	
 	private byte[] fileAsArray;
 	//Header
 	private int idOffset;
@@ -17,6 +20,7 @@ public class JMpqEditor {
 	private int hashSize;
 	private int blockSize;
 	
+	private HashMap hashMap;
 	
 	public JMpqEditor(File mpq) throws JMpqException{
 		try {
@@ -38,5 +42,11 @@ public class JMpqEditor {
 		blockPos = reader.readInt();
 		hashSize = reader.readInt();
 		blockSize = reader.readInt();
+		
+		hashMap = new HashMap(Arrays.copyOfRange(fileAsArray, hashPos, hashPos + hashSize));
+	}
+	
+	private void prepareCryptTable(){
+		//TODO implement
 	}
 }

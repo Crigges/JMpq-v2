@@ -39,6 +39,13 @@ public class ByteReader {
 		return content[pos -1];
 	}
 	
+	public long readLong(){
+		byte[] bytes = readBytes(8);
+		ByteBuffer bb = ByteBuffer.wrap(bytes);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		return bb.getLong();
+	}
+	
 	public int readInt(){
 		byte[] bytes = readBytes(4);
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
