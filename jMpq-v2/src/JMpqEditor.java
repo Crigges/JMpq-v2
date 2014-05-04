@@ -1,9 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
 
 public class JMpqEditor {
-	private BinFileReader reader;
-	
+	private byte[] fileAsArray;
 	//Header
 	private int idOffset;
 	private int headerSize;
@@ -18,12 +20,11 @@ public class JMpqEditor {
 	
 	public JMpqEditor(File mpq) throws JMpqException{
 		try {
-			reader = new BinFileReader(mpq);
-		} catch (FileNotFoundException e) {
+			fileAsArray = Files.readAllBytes(mpq.toPath());;
+		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-		//pass offset
-		reader.readBytes(512);
+		ByteReader reader = new ByteReader(Arrays.copyOfRange(fileAsArray, 512, 512 + 32));
 		if (!new String(reader.readBytes(3)).equals("MPQ")){
 			throw new JMpqException("Invaild file format or damaged mpq");
 		}

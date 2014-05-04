@@ -5,10 +5,12 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 
 
 public class BinFileWriter {
 	private RandomAccessFile writer = null;
+	
 	
 	public BinFileWriter(File newFile){
 		try {

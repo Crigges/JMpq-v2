@@ -5,21 +5,19 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
+import java.util.Arrays;
 
-public class BinFileReader {
-	private RandomAccessFile reader = null;
+public class ByteReader {
+	private byte[] content;
+	private int pos = 0;
 	
-	public BinFileReader(File dooFile) throws FileNotFoundException{
-		reader = new RandomAccessFile(dooFile, "r");
+	public ByteReader(byte[] arr){
+		content = arr;
 	}
 	
 	public byte[] readBytes(int amount){
-		byte[] bytes = new byte[amount];
-		try {
-			reader.read(bytes);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		byte[] bytes = Arrays.copyOfRange(content, pos, pos + amount);
+		pos += amount;
 		return bytes;
 	}
 	
@@ -33,16 +31,12 @@ public class BinFileReader {
 			i++;
 			b = readByte();
 		}
-		return new String(bytes);
+		return new String(bytes).trim();
 	}
 	
 	public byte readByte(){
-		try {
-			return reader.readByte();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return 0;
-		}
+		pos++;
+		return content[pos -1];
 	}
 	
 	public int readInt(){
@@ -68,13 +62,5 @@ public class BinFileReader {
 	
 	public String readFourchar(){
 		return new String(readBytes(4));
-	}
-	
-	public void close(){
-		try {
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }
