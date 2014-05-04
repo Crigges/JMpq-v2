@@ -11,9 +11,9 @@ import com.google.common.io.Files;
 import com.google.common.io.LittleEndianDataInputStream;
 
 
-public class HashMap {
+public class HashTable {
 
-	public HashMap(byte[] arr, int hashPos, int hashSize) throws IOException{
+	public HashTable(byte[] arr, int hashPos, int hashSize) throws IOException{
 		
 		MpqCrypto c = new MpqCrypto();
 		
@@ -26,13 +26,10 @@ public class HashMap {
 		
 		Files.write(decrypted, new File("testD.data"));
 		
-		System.out.println("offset = " + hashPos);
-		System.out.println("size = " + hashSize);
 		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 		
 		for(int i=0; i<hashSize; i++) {
 			Entry e = new Entry(in);
-			System.out.println(e);
 		}
 	}
 	

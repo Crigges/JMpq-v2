@@ -22,7 +22,8 @@ public class JMpqEditor {
 	private int hashSize;
 	private int blockSize;
 	
-	private HashMap hashMap;
+	private HashTable hashTable;
+	private BlockTable blockTable;
 	
 	public JMpqEditor(File mpq) throws JMpqException, IOException{
 		try {
@@ -50,7 +51,8 @@ public class JMpqEditor {
 		
 		System.out.println("this = " +this);
 		
-		hashMap = new HashMap(fileAsArray, hashPos+512, hashSize);
+		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
+		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 	}
 
 	private String readString(DataInput reader, int size) throws IOException {
@@ -67,7 +69,7 @@ public class JMpqEditor {
 				+ formatVersion + ", discBlockSize=" + discBlockSize
 				+ ", hashPos=" + hashPos + ", blockPos=" + blockPos
 				+ ", hashSize=" + hashSize + ", blockSize=" + blockSize
-				+ ", hashMap=" + hashMap + "]";
+				+ ", hashMap=" + hashTable + "]";
 	}
 	
 	
