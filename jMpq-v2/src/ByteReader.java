@@ -1,3 +1,6 @@
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,8 +14,11 @@ public class ByteReader {
 	private byte[] content;
 	private int pos = 0;
 	
+	
 	public ByteReader(byte[] arr){
 		content = arr;
+		
+		
 	}
 	
 	public byte[] readBytes(int amount){
