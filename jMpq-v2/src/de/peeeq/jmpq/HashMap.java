@@ -1,10 +1,13 @@
 package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
-import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 
+import com.google.common.io.Files;
 import com.google.common.io.LittleEndianDataInputStream;
 
 
@@ -14,8 +17,15 @@ public class HashMap {
 		
 		MpqCrypto c = new MpqCrypto();
 		
-		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize);
+		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize).order(ByteOrder.LITTLE_ENDIAN);
+		
+		
+		Files.write(Arrays.copyOfRange(arr, hashPos, hashPos+16*hashSize), new File("test.data"));
+		
 		byte[] decrypted = c.decryptBlock(buf, 16*hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
+		
+		
+		Files.write(decrypted, new File("testD.data"));
 		
 		System.out.println("offset = " + hashPos);
 		System.out.println("size = " + hashSize);

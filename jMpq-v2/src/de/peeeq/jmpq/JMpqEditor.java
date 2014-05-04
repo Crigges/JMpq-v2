@@ -1,13 +1,9 @@
 package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import com.google.common.io.LittleEndianDataInputStream;
 
@@ -15,8 +11,6 @@ import com.google.common.io.LittleEndianDataInputStream;
  * 
  */
 public class JMpqEditor {
-	private final static BigInteger hashkey = new BigInteger("C3AF3770", 16);
-	
 	private byte[] fileAsArray;
 	//Header
 	private int headerSize;
@@ -56,7 +50,7 @@ public class JMpqEditor {
 		
 		System.out.println("this = " +this);
 		
-		hashMap = new HashMap(fileAsArray, hashPos, hashSize);
+		hashMap = new HashMap(fileAsArray, hashPos+512, hashSize);
 	}
 
 	private String readString(DataInput reader, int size) throws IOException {
@@ -66,10 +60,6 @@ public class JMpqEditor {
 		return startString;
 	}
 	
-	private void prepareCryptTable(){
-		//TODO implement
-	}
-
 	@Override
 	public String toString() {
 		return "JMpqEditor [headerSize=" + headerSize

@@ -1,7 +1,7 @@
 package de.peeeq.jmpq;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class MpqCrypto {
@@ -69,7 +69,7 @@ public class MpqCrypto {
 	public byte[] decryptBlock(ByteBuffer buf, int length, int key) {
 		int seed = 0xEEEEEEEE;
 
-		ByteBuffer resultBuffer = ByteBuffer.allocate(length);
+		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
 		
 		// Round to longs
 		length >>= 2;
