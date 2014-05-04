@@ -1,3 +1,4 @@
+package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -5,8 +6,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.google.common.io.LittleEndianDataInputStream;
-
-import de.peeeq.jmpq.MpqCrypto;
 
 
 public class HashMap {

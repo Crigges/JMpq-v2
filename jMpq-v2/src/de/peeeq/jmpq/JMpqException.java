@@ -1,3 +1,4 @@
+package de.peeeq.jmpq;
 
 public class JMpqException extends Exception {
 	
