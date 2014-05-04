@@ -62,7 +62,7 @@ public class MpqCrypto {
 	}
 
 	public byte[] decryptBlock(byte[] block, int key) {
-		ByteBuffer buf = ByteBuffer.wrap(block);
+		ByteBuffer buf = ByteBuffer.wrap(block).order(ByteOrder.LITTLE_ENDIAN);
 		return decryptBlock(buf, block.length, key);
 	}
 
@@ -76,18 +76,20 @@ public class MpqCrypto {
 
 		for (int i=0; i<length; i++) {
 			seed += cryptTable[0x400 + (key & 0xFF)];
+			
 			int ch = buf.getInt() ^ (key + seed);
 			resultBuffer.putInt(ch);
 
-			key = ((~key << 0x15) + 0x11111111) | (key >> 0x0B);
+			key = ((~key << 0x15) + 0x11111111) | (key >>> 0x0B);
 			seed = ch + seed + (seed << 5) + 3;
 		}
+		
 		return resultBuffer.array();
 	}
 	
 	public byte[]  encryptMpqBlock(ByteBuffer buf, int length, int dwKey1)
 	{
-		ByteBuffer resultBuffer = ByteBuffer.allocate(length);
+		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
 		int dwValue32;
 	    int dwKey2 = 0xEEEEEEEE;
 
@@ -103,7 +105,7 @@ public class MpqCrypto {
 	        dwValue32 = buf.getInt();
 	        resultBuffer.putInt(dwValue32 ^ (dwKey1 + dwKey2));
 
-	        dwKey1 = ((~dwKey1 << 0x15) + 0x11111111) | (dwKey1 >> 0x0B);
+	        dwKey1 = ((~dwKey1 << 0x15) + 0x11111111) | (dwKey1 >>> 0x0B);
 	        dwKey2 = dwValue32 + dwKey2 + (dwKey2 << 5) + 3;
 	    }
 	    return resultBuffer.array();
@@ -120,6 +122,10 @@ public class MpqCrypto {
 		System.out.println("a = " + Arrays.toString(a));
 		System.out.println("b = " + Arrays.toString(b));
 		System.out.println("b = " + new String(b));
+	}
+
+	public byte[] encryptMpqBlock(byte[] bytes, int length, int key) {
+		return encryptMpqBlock(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN), length, key);
 	}
 
 }

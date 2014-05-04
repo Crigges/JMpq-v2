@@ -19,7 +19,6 @@ public class HashMap {
 		
 		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize).order(ByteOrder.LITTLE_ENDIAN);
 		
-		
 		Files.write(Arrays.copyOfRange(arr, hashPos, hashPos+16*hashSize), new File("test.data"));
 		
 		byte[] decrypted = c.decryptBlock(buf, 16*hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
