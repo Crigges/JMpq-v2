@@ -53,6 +53,7 @@ public class JMpqEditor {
 		
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
+		System.out.println(blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.mmp")));
 	}
 
 	private String readString(DataInput reader, int size) throws IOException {

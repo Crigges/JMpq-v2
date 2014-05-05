@@ -12,10 +12,16 @@ import com.google.common.io.LittleEndianDataInputStream;
 
 
 public class HashTable {
+	private MpqCrypto c;
+	private int hashPos;
+	private int hashSize;
+	private Entry[] content;
 
 	public HashTable(byte[] arr, int hashPos, int hashSize) throws IOException{
-		
-		MpqCrypto c = new MpqCrypto();
+		this.hashPos = hashPos;
+		this.hashSize = hashSize;
+		content = new Entry[hashSize];
+		c = new MpqCrypto();
 		
 		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize).order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -29,8 +35,23 @@ public class HashTable {
 		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 		
 		for(int i=0; i<hashSize; i++) {
-			Entry e = new Entry(in);
+			content[i] = new Entry(in);
 		}
+	}
+	
+	public int getBlockIndexOfFile(String name) throws JMpqException{
+		int index = c.hash(name, MpqCrypto.MPQ_HASH_TABLE_INDEX);
+		int name1 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_A);
+		int name2 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_B);
+		int start = index & (hashSize - 1);
+		for(int i = start; i < hashSize; i++){
+			if(content[start].dwName1 == name1 && content[start].dwName2 == name2){
+				return content[start].dwBlockIndex;
+			}else if(content[start].wPlatform != 0){
+				throw new JMpqException("File Not Found");
+			}
+		}
+		throw new JMpqException("File Not Found");
 	}
 	
 	public class Entry{
@@ -54,9 +75,5 @@ public class HashTable {
 					+ ",	lcLocale=" + lcLocale + ",	wPlatform=" + wPlatform
 					+ ",	dwBlockIndex=" + dwBlockIndex + "]";
 		}
-		
-		
 	}
-	
-	
 }

@@ -14,6 +14,7 @@ import com.google.common.io.LittleEndianDataInputStream;
 import de.peeeq.jmpq.HashTable.Entry;
 
 public class BlockTable {
+	private Block[] content;
 	
 	public BlockTable(byte[] arr, int blockPos, int blockSize) throws IOException{
 		
@@ -25,22 +26,24 @@ public class BlockTable {
 		
 		byte[] decrypted = c.decryptBlock(buf, 16*blockSize, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
 		
-		
 		Files.write(decrypted, new File("testD.data"));
 		
-		System.out.println("offset = " + blockPos);
-		System.out.println("size = " + blockSize);
 		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 		
+		content = new Block[blockSize];
+		
 		for(int i=0; i<blockSize; i++) {
-			Block e = new Block(in);
-			System.out.println(e);
+			content[i] = new Block(in);
 		}
 	}
-
 	
-	
-	
+	public Block getBlockAtPos(int pos) throws JMpqException{
+		try {
+			return content[pos];
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new JMpqException("Invaild block position");
+		}
+	}
 	
 	public class Block{
 		private int filePos;
