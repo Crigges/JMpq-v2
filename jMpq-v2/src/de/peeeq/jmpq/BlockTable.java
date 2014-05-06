@@ -72,10 +72,6 @@ public class BlockTable {
 			compressedSize = in.readInt();
 			normalSize = in.readInt();
 			flags = in.readInt();
-			if(flags < 0){
-				flags *= -1L;
-				flags += 2147483648L;
-			}
 		}
 
 		@Override

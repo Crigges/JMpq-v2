@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 
 import com.google.common.io.LittleEndianDataInputStream;
 
@@ -54,6 +55,7 @@ public class JMpqEditor {
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 		System.out.println(blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.j")));
+		new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.j")), discBlockSize);
 	}
 
 	private String readString(DataInput reader, int size) throws IOException {
