@@ -32,7 +32,6 @@ public class JMpqEditor {
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-//		ByteReader reader = new ByteReader(Arrays.copyOfRange(fileAsArray, 512, 512 + 32));
 		DataInput reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32));
 		
 
