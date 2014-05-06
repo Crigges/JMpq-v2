@@ -43,7 +43,7 @@ public class JMpqEditor {
 		headerSize = reader.readInt();
 		archiveSize = reader.readInt();
 		formatVersion = reader.readUnsignedShort();
-		discBlockSize = reader.readUnsignedShort();
+		discBlockSize = 512 * (1 << reader.readUnsignedShort()); //don't remove that peq, it is important :D 
 		hashPos = reader.readInt();
 		blockPos = reader.readInt();
 		hashSize = reader.readInt();

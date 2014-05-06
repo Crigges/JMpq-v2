@@ -46,6 +46,22 @@ public class BlockTable {
 	}
 	
 	public class Block{
+		public int getFilePos() {
+			return filePos;
+		}
+
+		public int getCompressedSize() {
+			return compressedSize;
+		}
+
+		public int getNormalSize() {
+			return normalSize;
+		}
+
+		public long getFlags() {
+			return flags;
+		}
+
 		private int filePos;
 		private int compressedSize;
 		private int normalSize;
