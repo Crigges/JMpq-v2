@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 import com.google.common.io.LittleEndianDataInputStream;
 
+import de.peeeq.jmpq.BlockTable.Block;
+
 /**
  * 
  */
@@ -49,12 +51,20 @@ public class JMpqEditor {
 		hashSize = reader.readInt();
 		blockSize = reader.readInt();
 		
-		System.out.println("this = " +this);
-		
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
-		System.out.println(blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.j")));
 		new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.j")), discBlockSize);
+	}
+	
+	public void extractFile(String name, File dest) throws JMpqException{
+		Block fileInfo = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name));
+		System.out.println(fileInfo);
+		try {
+			MpqFile mfile = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), fileInfo, discBlockSize);
+			mfile.extractToFile(dest);
+		} catch (IOException e) {
+			throw new JMpqException(e.getMessage());
+		}
 	}
 
 	private String readString(DataInput reader, int size) throws IOException {

@@ -3,10 +3,12 @@ package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import com.google.common.io.LittleEndianDataInputStream;
 import com.jcraft.jzlib.Inflater;
@@ -22,8 +24,12 @@ public class MpqFile {
 	
 	
 	private Sector[] sectors;
+	private int sectorSize;
+	private Block info;
 	
 	public MpqFile(byte[] fileAsArray, Block b, int sectorSize) throws IOException, JMpqException{
+		this.info = b;
+		this.sectorSize = sectorSize;
 		int sectorCount = b.getNormalSize() / sectorSize + 2;
 		
 		if((b.getFlags() & ENCRYPTED) == ENCRYPTED){
@@ -46,28 +52,25 @@ public class MpqFile {
 				start = end;
 				end = in.readInt();
 			}
-		}	
-		FileOutputStream out = new FileOutputStream(new File("testj.txt"));
-		int c = 0;
-		
-		Inflater inf = new Inflater();
-		byte[] output = new byte[sectorSize];
-		inf.setInput(sectors[0].content);
-		inf.setOutput(output);
-		
-		 while(inf.total_out<sectorSize &&
-			      inf.total_in<sectors[0].content.length) {
-			      inf.avail_in=inf.avail_out=1; /* force small buffers */
-			      int err=inf.inflate(JZlib.Z_NO_FLUSH);
-			      if(err==JZlib.Z_STREAM_END) break;
-			    }
-		System.out.println(new String(output));
-		 
-		for(Sector s : sectors){
-			c += s.content.length + 1;
+		}else{
+			throw new JMpqException("Uncompressed File");
 		}
-		c += (sectorCount) * 4;
-		System.out.println(c + " vs " + b.getCompressedSize());
+	}
+	
+	public void extractToFile(File f) throws IOException{
+		byte[] fullFile = new byte[info.getNormalSize()];
+		int i = 0;
+		for(Sector s : sectors){
+			if(i + sectorSize > info.getNormalSize()){
+				System.arraycopy(JzLibHelper.inflate(s, sectorSize), 0, fullFile, i, info.getNormalSize() - i);
+			}else{
+				System.arraycopy(JzLibHelper.inflate(s, sectorSize), 0, fullFile, i, sectorSize);
+			}
+			i += sectorSize;
+		}
+		FileOutputStream out = new FileOutputStream(f);
+		out.write(fullFile);
+		out.close();
 	}
 	             
 	public class Sector{
@@ -77,11 +80,11 @@ public class MpqFile {
 		public Sector(DataInput in, int sectorSize) throws IOException, JMpqException{
 			compressionType = in.readByte();
 			if(!((compressionType & 2) == 2)){
-				throw new JMpqException("Unsupported compression algorithm");
+				throw new JMpqException("Unsupported compression algorithm: " + compressionType);
 			}
 			content = new byte[sectorSize - 1];
 			in.readFully(content);
-			System.out.println(DebugHelper.bytesToHex(content));
+			//System.out.println(DebugHelper.bytesToHex(content));
 		}
 	}
 }
