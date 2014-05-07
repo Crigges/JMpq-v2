@@ -46,9 +46,16 @@ public class MpqFile {
 			int end = in.readInt();
 			int finalSize = 0;
 			for(int i = 0; i < sectorCount - 1; i++){
-				sectors[i] = new Sector(
+				if(b.getNormalSize() - finalSize <= sectorSize){
+					sectors[i] = new Sector(
 						new LittleEndianDataInputStream(
-								new ByteArrayInputStream(fileAsArray, b.getFilePos() + start, end)), end - start);
+						new ByteArrayInputStream(fileAsArray, b.getFilePos() + start, end)), end - start, b.getNormalSize() - finalSize);
+				}else{
+					sectors[i] = new Sector(
+						new LittleEndianDataInputStream(
+						new ByteArrayInputStream(fileAsArray, b.getFilePos() + start, end)), end - start, sectorSize);
+				}
+				finalSize += sectorSize;
 				start = end;
 				end = in.readInt();
 			}
@@ -61,11 +68,7 @@ public class MpqFile {
 		byte[] fullFile = new byte[info.getNormalSize()];
 		int i = 0;
 		for(Sector s : sectors){
-			if(i + sectorSize > info.getNormalSize()){
-				System.arraycopy(JzLibHelper.inflate(s, sectorSize), 0, fullFile, i, info.getNormalSize() - i);
-			}else{
-				System.arraycopy(JzLibHelper.inflate(s, sectorSize), 0, fullFile, i, sectorSize);
-			}
+			System.arraycopy(s.content, 0, fullFile, i, s.content.length);
 			i += sectorSize;
 		}
 		FileOutputStream out = new FileOutputStream(f);
@@ -74,16 +77,24 @@ public class MpqFile {
 	}
 	             
 	public class Sector{
+		boolean isCompressed;
 		byte compressionType;
 		byte[] content;
 		
-		public Sector(DataInput in, int sectorSize) throws IOException, JMpqException{
-			compressionType = in.readByte();
-			if(!((compressionType & 2) == 2)){
-				throw new JMpqException("Unsupported compression algorithm: " + compressionType);
+		public Sector(DataInput in, int sectorSize, int uncomSectorSize) throws IOException, JMpqException{
+			if(sectorSize == uncomSectorSize){
+				content = new byte[uncomSectorSize];
+				in.readFully(content);
+			}else{
+				isCompressed = true;
+				compressionType = in.readByte();
+				if(!((compressionType & 2) == 2)){
+					throw new JMpqException("Unsupported compression algorithm: " + compressionType);
+				}
+				byte[] temp = new byte[sectorSize];
+				in.readFully(temp);
+				content = JzLibHelper.inflate(temp, uncomSectorSize);
 			}
-			content = new byte[sectorSize - 1];
-			in.readFully(content);
 			//System.out.println(DebugHelper.bytesToHex(content));
 		}
 	}
