@@ -46,6 +46,18 @@ public class BlockTable {
 	}
 	
 	public class Block{
+		private int filePos;
+		private int compressedSize;
+		private int normalSize;
+		private long flags;
+
+		public Block(DataInput in) throws IOException{
+			filePos = in.readInt();
+			compressedSize = in.readInt();
+			normalSize = in.readInt();
+			flags = in.readInt();
+		}
+		
 		public int getFilePos() {
 			return filePos;
 		}
@@ -60,18 +72,6 @@ public class BlockTable {
 
 		public long getFlags() {
 			return flags;
-		}
-
-		private int filePos;
-		private int compressedSize;
-		private int normalSize;
-		private long flags;
-		
-		public Block(DataInput in) throws IOException{
-			filePos = in.readInt();
-			compressedSize = in.readInt();
-			normalSize = in.readInt();
-			flags = in.readInt();
 		}
 
 		@Override

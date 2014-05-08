@@ -44,12 +44,14 @@ public class HashTable {
 		int name1 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_A);
 		int name2 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_B);
 		int start = index & (hashSize - 1);
-		for(int i = start; i < hashSize; i++){
+		for(int c = 0; c <= hashSize; c++){
 			if(content[start].dwName1 == name1 && content[start].dwName2 == name2){
 				return content[start].dwBlockIndex;
 			}else if(content[start].wPlatform != 0){
 				throw new JMpqException("File Not Found");
 			}
+			start %= hashSize;
+			start++;
 		}
 		throw new JMpqException("File Not Found");
 	}

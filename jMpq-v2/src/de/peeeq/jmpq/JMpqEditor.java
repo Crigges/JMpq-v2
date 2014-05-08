@@ -27,6 +27,7 @@ public class JMpqEditor {
 	
 	private HashTable hashTable;
 	private BlockTable blockTable;
+	private Listfile listFile;
 	
 	public JMpqEditor(File mpq) throws JMpqException, IOException{
 		try {
@@ -53,16 +54,20 @@ public class JMpqEditor {
 		
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
-		new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("war3map.j")), discBlockSize);
+		File temp = File.createTempFile("list", "file");
+		extractFile("(listfile)", temp);
+		listFile = new Listfile(Files.readAllBytes(temp.toPath()));
+		
 	}
 	
 	public void extractFile(String name, File dest) throws JMpqException{
 		Block fileInfo = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name));
 		System.out.println(fileInfo);
 		try {
-			MpqFile mfile = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), fileInfo, discBlockSize);
+			MpqFile mfile = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), fileInfo, discBlockSize, name);
 			mfile.extractToFile(dest);
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new JMpqException(e.getMessage());
 		}
 	}
