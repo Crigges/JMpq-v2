@@ -10,4 +10,8 @@ public class JMpqException extends Exception {
 	public JMpqException(){
 		super();
 	}
+	
+	public JMpqException(Throwable t){
+		super(t);
+	}
 }

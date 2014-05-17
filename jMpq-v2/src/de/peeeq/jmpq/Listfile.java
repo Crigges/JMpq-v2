@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Listfile {
-	LinkedList<String> files = new LinkedList<String>();
+	private LinkedList<String> files = new LinkedList<String>();
 
 	public Listfile(byte[] file){
 		String list = new String(file);
@@ -18,8 +18,14 @@ public class Listfile {
 		}
 	}
 	
+	public LinkedList<String> getFiles(){
+		return files;
+	}
+	
 	public void addFile(String name){
-		files.add(name);
+		if(!files.contains(name)){
+			files.add(name);
+		}
 	}
 	
 	public void removeFile(String name){
