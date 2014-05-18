@@ -39,7 +39,6 @@ public class BlockTable {
 		
 		for(int i=0; i<blockSize; i++) {
 			content[i] = new Block(in);
-			System.out.println(content[i]);
 		}
 	}
 	

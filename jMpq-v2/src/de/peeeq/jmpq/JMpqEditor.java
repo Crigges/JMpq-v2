@@ -58,7 +58,6 @@ public class JMpqEditor {
 		blockPos = reader.readInt();
 		hashSize = reader.readInt();
 		blockSize = reader.readInt();
-		System.out.println(this);
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 		File temp = File.createTempFile("list", "file");
@@ -152,11 +151,11 @@ public class JMpqEditor {
 				lines = a * 2;
 			}
 			//Calculate Archive Size 
+			filesByName.put("(listfile)", new MpqFile(listFile.asByteArray(), "(listfile)", discBlockSize));
 			archiveSize = lines * 8 * 4 + 32 + 512 + lines * 2;
 			LinkedList<MpqFile> files = new LinkedList<>();
 			for(String s : listFile.getFiles()){
 				MpqFile f = filesByName.get(s);
-				System.out.println("dat file was wrong" + s);
 				files.add(filesByName.get(s));
 			}
 			int offsetHelper = 0;
@@ -164,7 +163,6 @@ public class JMpqEditor {
 				archiveSize += f.getCompSize();
 				f.setOffset(offsetHelper + 32);
 				offsetHelper+= f.getCompSize();
-				System.out.println(f);
 			}
 			ByteBuffer buf = ByteBuffer.allocate(32);
 			buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -185,7 +183,6 @@ public class JMpqEditor {
 			//Write file data
 			for(MpqFile f : files){
 				byte[] arr = f.getFileAsByteArray((int) (out.getChannel().position() - 512));
-				System.out.println("--------------------------------");
 				out.write(arr);
 			}
 			//Generate BlockTable

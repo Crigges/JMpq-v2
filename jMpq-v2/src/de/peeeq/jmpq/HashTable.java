@@ -39,7 +39,6 @@ public class HashTable {
 			if(content[i].wPlatform == 0) {
 				vaildEntrys++;
 			}
-			//System.out.println(content[i]);
 		}
 	}
 	
@@ -71,7 +70,6 @@ public class HashTable {
 		}
 		temp = c.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_HASH_TABLE);
 		HashTable ht = new HashTable(temp, 0, size);
-		System.out.println(ht.getBlockIndexOfFile("war3map.j") == orginal.getBlockIndexOfFile("war3map.j"));
 		out.write(temp);
 	}
 	

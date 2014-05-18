@@ -13,9 +13,6 @@ public class Listfile {
 			files.add(sc.nextLine());
 		}
 		sc.close();
-		for(String s : files){
-			System.out.println(s);
-		}
 	}
 	
 	public LinkedList<String> getFiles(){
