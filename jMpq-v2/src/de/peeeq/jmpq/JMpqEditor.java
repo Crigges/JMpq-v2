@@ -21,6 +21,7 @@ import de.peeeq.jmpq.BlockTable.Block;
  */
 public class JMpqEditor {
 	private byte[] fileAsArray;
+	private File mpq;
 	//Header
 	private int headerSize;
 	private int archiveSize;
@@ -37,6 +38,7 @@ public class JMpqEditor {
 	private HashMap<String, MpqFile> filesByName = new HashMap<>();
 	
 	public JMpqEditor(File mpq) throws JMpqException, IOException{
+		this.mpq = mpq;
 		try {
 			fileAsArray = Files.readAllBytes(mpq.toPath());
 		} catch (IOException e) {
@@ -125,7 +127,7 @@ public class JMpqEditor {
 		File temp = null;
 		FileOutputStream out = null;
 		try {
-			temp = new File("testbuild.w3x");
+			temp = File.createTempFile("war", "mpq");
 			out =  new FileOutputStream(temp);
 		} catch (IOException e) {
 			throw new JMpqException("Could not create buildfile, reason: " + e.getCause());
@@ -203,6 +205,13 @@ public class JMpqEditor {
 			out.close();
 		} catch (IOException e) {
 			throw new JMpqException("Could not finalize buildfile: " + e.getCause());
+		}
+		try {
+			mpq.delete();
+			Files.copy(temp.toPath(), new FileOutputStream(mpq));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
