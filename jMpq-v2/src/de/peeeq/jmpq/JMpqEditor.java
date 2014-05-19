@@ -127,6 +127,24 @@ public class JMpqEditor {
 			throw new JMpqException(e);
 		}
 	}
+	
+	public byte[] extractFile(String name) throws JMpqException{
+		try {
+			MpqFile f = filesByName.get(name);
+			if(f != null){
+				return f.asFileArray();
+			}else{
+				try {
+					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name)), discBlockSize, name);
+					return fil.asFileArray();
+				} catch (Exception e) {
+					throw new JMpqException("Could not find file: " + name);
+				}
+			}
+		} catch (IOException e) {
+			throw new JMpqException(e);
+		}
+	}
 
 	private String readString(DataInput reader, int size) throws IOException {
 		byte[] start = new byte[size];
