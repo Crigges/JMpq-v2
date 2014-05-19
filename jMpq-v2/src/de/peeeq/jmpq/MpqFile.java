@@ -180,7 +180,11 @@ public class MpqFile {
 				if(b.getNormalSize() - finalSize <= sectorSize){
 					byte[] temp = new byte[end - start];
 					System.arraycopy(fileAsArray, b.getFilePos() + start, temp, 0, temp.length);
-					sectors[i] = new Sector(temp, end - start, b.getNormalSize() - finalSize, crypto, baseKey);
+					try {
+						sectors[i] = new Sector(temp, end - start, b.getNormalSize() - finalSize, crypto, baseKey + i);
+					} catch (Exception e) {
+						throw new JMpqException(e.getMessage() + " for file " + name);
+					}
 					break;
 				}else{
 					byte[] temp = new byte[end - start];
@@ -231,6 +235,16 @@ public class MpqFile {
 		out.write(fullFile);
 		out.close();
 	}
+	
+	public byte[] asFileArray() throws IOException{
+		byte[] fullFile = new byte[normalSize];
+		int i = 0;
+		for(Sector s : sectors){
+			System.arraycopy(s.contentUnCompressed, 0, fullFile, i, s.contentUnCompressed.length);
+			i += sectorSize;
+		}
+		return fullFile;
+	}
 	             
 	public class Sector{
 		boolean isCompressed = true;
@@ -262,7 +276,16 @@ public class MpqFile {
 		
 		public Sector(byte[] data){
 			contentUnCompressed = data;
-			contentCompressed = JzLibHelper.deflate(data);
+			try {
+				contentCompressed = JzLibHelper.deflate(data);
+			} catch (Exception e) {
+				contentCompressed = data;
+				isCompressed = false;
+			}
 		}
+	}
+
+	public int getSectorSize() {
+		return sectorSize;
 	}
 }

@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -122,8 +123,9 @@ public class JMpqEditor {
 		return startString;
 	}
 	
-	private void build() throws JMpqException{
+	private void build(boolean bestCompression) throws JMpqException{
 		// Write start offset -> Caluclate header -> WriteFiles and save their offsets -> Generate Blocktable -> Generate Hastable  -> Write HashTable -> Write BlockTable
+		boolean rebuild = bestCompression & discBlockSize != (512 * (1 << 10));
 		File temp = null;
 		FileOutputStream out = null;
 		try {
@@ -160,6 +162,14 @@ public class JMpqEditor {
 				MpqFile f = filesByName.get(s);
 				files.add(filesByName.get(s));
 			}
+			if(rebuild){
+				LinkedList<MpqFile> tempList = files;
+				files = new LinkedList<>();
+				for(MpqFile f : tempList){
+					// 2^10
+					files.add(new MpqFile(f.asFileArray(), f.getName(), 512 * (1 << 10)));
+				}
+			}
 			int offsetHelper = 0;
 			for(MpqFile f : files){
 				archiveSize += f.getCompSize();
@@ -172,7 +182,11 @@ public class JMpqEditor {
 			buf.putInt(headerSize);
 			buf.putInt(archiveSize);
 			buf.putShort((short) formatVersion);
-			buf.putShort((short) 3);
+			if(files.getFirst().getSectorSize() == 512 * (1 << 10)){
+				buf.putShort((short) 10);
+			}else{
+				buf.putShort((short) 3);
+			}
 			buf.putInt(offsetHelper + 32);
 			buf.putInt(offsetHelper + 32 + lines * 16);
 			buf.putInt(lines);
@@ -215,10 +229,15 @@ public class JMpqEditor {
 		}
 	}
 	
-	public void close() throws JMpqException{
-		build();
+	/**
+	 * Closes the mpq and write the changes to the file
+	 * @param bestCompression provides better compression when true, but takes more time
+	 * @throws JMpqException if an error while writing occurs
+	 */
+	public void close(boolean bestCompression) throws JMpqException{
+		build(bestCompression);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "JMpqEditor [headerSize=" + headerSize
