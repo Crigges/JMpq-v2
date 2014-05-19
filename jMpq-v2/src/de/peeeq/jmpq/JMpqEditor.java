@@ -67,7 +67,7 @@ public class JMpqEditor {
 		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
 		MpqFile f = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), b, discBlockSize, "(listfile)");
 		f.extractToFile(temp);
-		listFile = new Listfile(Files.readAllBytes(temp.toPath()));
+		listFile = new Listfile(Files.readAllBytes(temp.toPath())); 
 		for(String s : listFile.getFiles()){
 			filesByName.put(s, new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(s)), discBlockSize, s));
 		}
@@ -82,6 +82,18 @@ public class JMpqEditor {
 	 * @throws JMpqException 
 	 */
 	public void insertFile(File source, String archiveName) throws JMpqException{
+		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
+		listFile.addFile(archiveName);
+		filesByName.put(archiveName, f);
+	}
+	
+	/**
+	 * If file already exists it will be replaced
+	 * @param source 
+	 * @param archiveName only use \ as file seperator / will fail
+	 * @throws JMpqException 
+	 */
+	public void insertFile(byte[] source, String archiveName) throws JMpqException{
 		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
 		listFile.addFile(archiveName);
 		filesByName.put(archiveName, f);
