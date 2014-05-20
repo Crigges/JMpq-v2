@@ -138,7 +138,9 @@ public class JMpqEditor {
 					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name)), discBlockSize, name);
 					return fil.asFileArray();
 				} catch (Exception e) {
-					throw new JMpqException("Could not find file: " + name);
+					
+					return null;
+					//throw new JMpqException("Could not find file: " + name);
 				}
 			}
 		} catch (IOException e) {
