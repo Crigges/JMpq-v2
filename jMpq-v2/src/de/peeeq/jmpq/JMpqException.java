@@ -1,6 +1,8 @@
 package de.peeeq.jmpq;
 
-public class JMpqException extends Exception {
+import java.io.IOException;
+
+public class JMpqException extends IOException {
 	private static final long serialVersionUID = 1L;
 
 	public JMpqException(String msg){
