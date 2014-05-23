@@ -18,7 +18,9 @@ import com.google.common.io.LittleEndianDataInputStream;
 import de.peeeq.jmpq.BlockTable.Block;
 
 /**
- * 
+ * @author peq & Crigges
+ *  Some basic basic pure java based mpq implementation to open and modify warcraft 3 archives.
+ *  Any bugs report here: https://github.com/Crigges/JMpq-v2/issues/new 
  */
 public class JMpqEditor {
 	private byte[] fileAsArray;
@@ -38,6 +40,13 @@ public class JMpqEditor {
 	private Listfile listFile;
 	private HashMap<String, MpqFile> filesByName = new HashMap<>();
 	
+	
+	/**
+	 * Creates a new editor by parsing an exisiting mpq.
+	 * @param mpq the mpq to parse
+	 * @throws JMpqException if mpq is damaged or not supported
+	 * @throws IOException if access problems occcur
+	 */
 	public JMpqEditor(File mpq) throws JMpqException, IOException{
 		this.mpq = mpq;
 		try {
@@ -76,10 +85,11 @@ public class JMpqEditor {
 	}
 	
 	/**
-	 * If file already exists it will be replaced
-	 * @param source 
+	 * Inserts a new file into the mpq with the specidied name.
+	 * If a file already exists it will get overwritten
+	 * @param source file which shold be inserted into the mpq 
 	 * @param archiveName only use \ as file seperator / will fail
-	 * @throws JMpqException 
+	 * @throws JMpqException if file can't be read
 	 */
 	public void insertFile(File source, String archiveName) throws JMpqException{
 		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
@@ -88,10 +98,11 @@ public class JMpqEditor {
 	}
 	
 	/**
-	 * If file already exists it will be replaced
-	 * @param source 
+	 * Inserts a new file into the mpq with the specidied name.
+	 * If a file already exists it will get overwritten
+	 * @param source as byte array
 	 * @param archiveName only use \ as file seperator / will fail
-	 * @throws JMpqException 
+	 * @throws JMpqException
 	 */
 	public void insertFile(byte[] source, String archiveName) throws JMpqException{
 		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
@@ -99,6 +110,11 @@ public class JMpqEditor {
 		filesByName.put(archiveName, f);
 	}
 	
+	/**
+	 * Deletes the specified file from the mpq
+	 * @param name of the file, only use \ as file seperator / will fail
+	 * @throws JMpqException if file is not found
+	 */
 	public void deleteFile(String name) throws JMpqException{
 		MpqFile f = filesByName.get(name);
 		if(f != null){
@@ -109,6 +125,12 @@ public class JMpqEditor {
 		}
 	}
 	
+	/**
+	 * Extracts the specified file out of the mpq
+	 * @param name of the file
+	 * @param dest to that the files content get copyed
+	 * @throws JMpqException if file is not found or access errors occur
+	 */
 	public void extractFile(String name, File dest) throws JMpqException{
 		try {
 			MpqFile f = filesByName.get(name);
@@ -128,6 +150,13 @@ public class JMpqEditor {
 		}
 	}
 	
+	
+	/**
+	 * Extracts the specified file out of the mpq
+	 * @param name of the file
+	 * @return the file as byte array
+	 * @throws JMpqException if file is not found
+	 */
 	public byte[] extractFile(String name) throws JMpqException{
 		try {
 			MpqFile f = filesByName.get(name);
@@ -189,7 +218,6 @@ public class JMpqEditor {
 			archiveSize = lines * 8 * 4 + 32 + 512 + lines * 2;
 			LinkedList<MpqFile> files = new LinkedList<>();
 			for(String s : listFile.getFiles()){
-				MpqFile f = filesByName.get(s);
 				files.add(filesByName.get(s));
 			}
 			if(rebuild){
@@ -254,14 +282,13 @@ public class JMpqEditor {
 			mpq.delete();
 			Files.copy(temp.toPath(), new FileOutputStream(mpq));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new JMpqException("Could overwrite the orginal mpq: " + e.getCause());
 		}
 	}
 	
 	/**
 	 * Closes the mpq and write the changes to the file
-	 * @param bestCompression provides better compression when true, but takes more time
+	 * @param bestCompression provides better compression when true, but may take more time
 	 * @throws JMpqException if an error while writing occurs
 	 */
 	public void close(boolean bestCompression) throws JMpqException{
