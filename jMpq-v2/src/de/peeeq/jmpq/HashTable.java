@@ -30,9 +30,7 @@ public class HashTable {
 		content = new Entry[hashSize];
 		c = new MpqCrypto();
 		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize).order(ByteOrder.LITTLE_ENDIAN);
-		Files.write(Arrays.copyOfRange(arr, hashPos, hashPos+16*hashSize), new File("test.data"));
 		byte[] decrypted = c.decryptBlock(buf, 16*hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
-		Files.write(decrypted, new File("testD.data"));
 		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted)); 
 		for(int i=0; i<hashSize; i++) {
 			content[i] = new Entry(in);

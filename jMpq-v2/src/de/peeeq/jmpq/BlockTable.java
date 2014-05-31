@@ -27,11 +27,7 @@ public class BlockTable {
 		
 		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16*blockSize).order(ByteOrder.LITTLE_ENDIAN);
 		
-		Files.write(Arrays.copyOfRange(arr, blockPos, blockPos+16*blockSize), new File("test.data"));
-		
 		byte[] decrypted = c.decryptBlock(buf, 16*blockSize, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
-		
-		Files.write(decrypted, new File("testD.data"));
 		
 		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 		
