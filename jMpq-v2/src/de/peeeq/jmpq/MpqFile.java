@@ -3,19 +3,13 @@ package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import com.google.common.io.LittleEndianDataInputStream;
-import com.jcraft.jzlib.Inflater;
-import com.jcraft.jzlib.JZlib;
 
 import de.peeeq.jmpq.BlockTable.Block;
 

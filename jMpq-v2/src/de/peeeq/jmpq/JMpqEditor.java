@@ -2,14 +2,11 @@ package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -50,7 +47,7 @@ public class JMpqEditor {
 	public JMpqEditor(File mpq) throws JMpqException, IOException{
 		this.mpq = mpq;
 		try {
-			fileAsArray = Files.readAllBytes(mpq.toPath());
+			fileAsArray = java.nio.file.Files.readAllBytes(mpq.toPath());
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
@@ -76,7 +73,7 @@ public class JMpqEditor {
 		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
 		MpqFile f = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), b, discBlockSize, "(listfile)");
 		f.extractToFile(temp);
-		listFile = new Listfile(Files.readAllBytes(temp.toPath())); 
+		listFile = new Listfile(java.nio.file.Files.readAllBytes(temp.toPath())); 
 		for(String s : listFile.getFiles()){
 			filesByName.put(s, new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(s)), discBlockSize, s));
 		}
@@ -280,9 +277,9 @@ public class JMpqEditor {
 		}
 		try {
 			mpq.delete();
-			Files.copy(temp.toPath(), new FileOutputStream(mpq));
+			com.google.common.io.Files.copy(temp, mpq);
 		} catch (IOException e) {
-			throw new JMpqException("Could overwrite the orginal mpq: " + e.getCause());
+			throw new JMpqException("Could not overwrite the orginal mpq: " + e.getCause());
 		}
 	}
 	
