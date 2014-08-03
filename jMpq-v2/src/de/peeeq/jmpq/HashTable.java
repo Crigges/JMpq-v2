@@ -1,17 +1,13 @@
 package de.peeeq.jmpq;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import com.google.common.io.Files;
 import com.google.common.io.LittleEndianDataInputStream;
 
 import de.peeeq.jmpq.BlockTable.Block;
@@ -19,13 +15,9 @@ import de.peeeq.jmpq.BlockTable.Block;
 
 public class HashTable {
 	private MpqCrypto c;
-	private int hashPos;
 	private int hashSize;
 	private Entry[] content;
-	private int vaildEntrys;
-
 	public HashTable(byte[] arr, int hashPos, int hashSize) throws IOException{
-		this.hashPos = hashPos;
 		this.hashSize = hashSize;
 		content = new Entry[hashSize];
 		c = new MpqCrypto();
@@ -35,7 +27,6 @@ public class HashTable {
 		for(int i=0; i<hashSize; i++) {
 			content[i] = new Entry(in);
 			if(content[i].wPlatform == 0) {
-				vaildEntrys++;
 			}
 		}
 	}
@@ -67,7 +58,7 @@ public class HashTable {
 			i++;
 		}
 		temp = c.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_HASH_TABLE);
-		HashTable ht = new HashTable(temp, 0, size);
+		new HashTable(temp, 0, size);
 		out.write(temp);
 	}
 	
@@ -82,8 +73,8 @@ public class HashTable {
 			}else if(content[start].wPlatform != 0){
 				throw new JMpqException("File Not Found");
 			}
-			start %= hashSize;
 			start++;
+			start %= hashSize;
 		}
 		throw new JMpqException("File Not Found");
 	}

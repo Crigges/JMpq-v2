@@ -2,20 +2,14 @@ package de.peeeq.jmpq;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 
-import com.google.common.io.Files;
 import com.google.common.io.LittleEndianDataInputStream;
-
-import de.peeeq.jmpq.HashTable.Entry;
 
 public class BlockTable {
 	Block[] content;
