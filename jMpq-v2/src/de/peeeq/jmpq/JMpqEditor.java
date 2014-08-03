@@ -85,6 +85,46 @@ public class JMpqEditor {
 	}
 	
 	/**
+	 * Creates a new editor by parsing an exisiting mpq.
+	 * @param mpq the mpq to parse, 
+	 * @throws JMpqException if mpq is damaged or not supported
+	 * @throws IOException if access problems occcur
+	 */
+	public JMpqEditor(File mpq, boolean readonlyMode) throws JMpqException, IOException{
+		this.mpq = mpq;
+		try {
+			fileAsArray = Files.readAllBytes(mpq.toPath());
+		} catch (IOException e) {
+			throw new JMpqException("The target file does not exists");
+		}
+		DataInput reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32));
+		
+
+		String startString = readString(reader, 4);
+		if (!startString.equals("MPQ" + ((char) 0x1A))){
+			throw new JMpqException("Invaild file format or damaged mpq");
+		}
+		//read header
+		headerSize = reader.readInt();
+		archiveSize = reader.readInt();
+		formatVersion = reader.readUnsignedShort();
+		discBlockSize = 512 * (1 << reader.readUnsignedShort()); //don't remove that peq, it is important :D 
+		hashPos = reader.readInt();
+		blockPos = reader.readInt();
+		hashSize = reader.readInt();
+		blockSize = reader.readInt();
+		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
+		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
+		File temp = File.createTempFile("list", "file");
+		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
+		MpqFile f = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), b, discBlockSize, "(listfile)");
+		f.extractToFile(temp);
+		listFile = new Listfile(Files.readAllBytes(temp.toPath())); 
+		listFile.addFile("(listfile)");
+		filesByName.put("(listfile)", f);
+	}
+	
+	/**
 	 * Inserts a new file into the mpq with the specidied name.
 	 * If a file already exists it will get overwritten
 	 * @param source file which shold be inserted into the mpq 
