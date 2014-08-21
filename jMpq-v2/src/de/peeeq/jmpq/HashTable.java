@@ -83,8 +83,8 @@ public class HashTable {
 			} else if (content[start].wPlatform != 0) {
 				throw new JMpqException("File Not Found");
 			}
-			start %= hashSize;
 			start++;
+			start %= hashSize;
 		}
 		throw new JMpqException("File Not Found");
 	}
