@@ -34,6 +34,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("deprecation")
 public class InflaterInputStream extends FilterInputStream {
 	protected final Inflater inflater;
 	protected byte[] buf;
@@ -84,6 +85,7 @@ public class InflaterInputStream extends FilterInputStream {
 
 	private byte[] byte1 = new byte[1];
 
+	@Override
 	public int read() throws IOException {
 		if (closed) {
 			throw new IOException("Stream closed");
@@ -91,6 +93,8 @@ public class InflaterInputStream extends FilterInputStream {
 		return read(byte1, 0, 1) == -1 ? -1 : byte1[0] & 0xff;
 	}
 
+	
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (closed) {
 			throw new IOException("Stream closed");
@@ -130,6 +134,7 @@ public class InflaterInputStream extends FilterInputStream {
 		return n;
 	}
 
+	@Override
 	public int available() throws IOException {
 		if (closed) {
 			throw new IOException("Stream closed");
@@ -143,6 +148,7 @@ public class InflaterInputStream extends FilterInputStream {
 
 	private byte[] b = new byte[512];
 
+	@Override
 	public long skip(long n) throws IOException {
 		if (n < 0) {
 			throw new IllegalArgumentException("negative skip length");
@@ -169,6 +175,7 @@ public class InflaterInputStream extends FilterInputStream {
 		return total;
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (!closed) {
 			if (myinflater)
@@ -197,13 +204,16 @@ public class InflaterInputStream extends FilterInputStream {
 		inflater.setInput(buf, 0, len, true);
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public synchronized void mark(int readlimit) {
 	}
 
+	@Override
 	public synchronized void reset() throws IOException {
 		throw new IOException("mark/reset not supported");
 	}

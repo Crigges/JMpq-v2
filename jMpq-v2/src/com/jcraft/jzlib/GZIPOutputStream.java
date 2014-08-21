@@ -32,6 +32,7 @@ package com.jcraft.jzlib;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@SuppressWarnings("deprecation")
 public class GZIPOutputStream extends DeflaterOutputStream {
 
 	public GZIPOutputStream(OutputStream out) throws IOException {
@@ -54,6 +55,7 @@ public class GZIPOutputStream extends DeflaterOutputStream {
 		super(out, deflater, size, close_out);
 	}
 
+	
 	private void check() throws GZIPException {
 		if (deflater.dstate.status != 42 /* INIT_STATUS */)
 			throw new GZIPException("header is already written.");

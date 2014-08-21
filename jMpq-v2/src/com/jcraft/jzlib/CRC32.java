@@ -55,6 +55,7 @@ final public class CRC32 implements Checksum {
 		}
 	}
 
+	@Override
 	public void update(byte[] buf, int index, int len) {
 		int c = ~v;
 		while (--len >= 0)
@@ -62,14 +63,17 @@ final public class CRC32 implements Checksum {
 		v = ~c;
 	}
 
+	@Override
 	public void reset() {
 		v = 0;
 	}
 
+	@Override
 	public void reset(long vv) {
 		v = (int) (vv & 0xffffffffL);
 	}
 
+	@Override
 	public long getValue() {
 		return (long) (v & 0xffffffffL);
 	}
@@ -153,6 +157,7 @@ final public class CRC32 implements Checksum {
 	 * crc32.reset(); } else{ System.err.println("unsupported operation"); } }
 	 * public long getValue(){ return crc32.getValue(); }
 	 */
+	@Override
 	public CRC32 copy() {
 		CRC32 foo = new CRC32();
 		foo.v = this.v;

@@ -32,6 +32,7 @@ package com.jcraft.jzlib;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("deprecation")
 public class GZIPInputStream extends InflaterInputStream {
 
 	public GZIPInputStream(InputStream in) throws IOException {
@@ -71,6 +72,7 @@ public class GZIPInputStream extends InflaterInputStream {
 		return inflater.istate.getGZIPHeader().getCRC();
 	}
 
+	@Override
 	public void readHeader() throws IOException {
 
 		byte[] empty = "".getBytes();

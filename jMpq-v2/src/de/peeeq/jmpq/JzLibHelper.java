@@ -36,7 +36,7 @@ public class JzLibHelper {
 		def.setOutput(comp);
 		while (def.total_in != bytes.length && def.total_out < bytes.length) {
 			def.avail_in = def.avail_out = 1; // force small buffers
-			int err = def.deflate(JZlib.Z_NO_FLUSH);
+			def.deflate(JZlib.Z_NO_FLUSH);
 		}
 
 		while (true) {

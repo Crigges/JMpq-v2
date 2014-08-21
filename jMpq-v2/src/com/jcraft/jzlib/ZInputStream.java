@@ -68,6 +68,7 @@ public class ZInputStream extends FilterInputStream {
 
 	private byte[] buf1 = new byte[1];
 
+	@Override
 	public int read() throws IOException {
 		if (read(buf1, 0, 1) == -1)
 			return -1;
@@ -76,6 +77,7 @@ public class ZInputStream extends FilterInputStream {
 
 	private byte[] buf = new byte[512];
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (compress) {
 			deflater.setOutput(b, off, len);
@@ -98,6 +100,7 @@ public class ZInputStream extends FilterInputStream {
 		}
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		int len = 512;
 		if (n < len)
@@ -128,6 +131,7 @@ public class ZInputStream extends FilterInputStream {
 			return iis.getTotalOut();
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (compress)
 			deflater.end();

@@ -44,20 +44,24 @@ final public class Adler32 implements Checksum {
 	private long s1 = 1L;
 	private long s2 = 0L;
 
+	@Override
 	public void reset(long init) {
 		s1 = init & 0xffff;
 		s2 = (init >> 16) & 0xffff;
 	}
 
+	@Override
 	public void reset() {
 		s1 = 1L;
 		s2 = 0L;
 	}
 
+	@Override
 	public long getValue() {
 		return ((s2 << 16) | s1);
 	}
 
+	@Override
 	public void update(byte[] buf, int index, int len) {
 
 		if (len == 1) {
@@ -82,7 +86,6 @@ final public class Adler32 implements Checksum {
 		}
 
 		int k = len2;
-		len -= k;
 		while (k-- > 0) {
 			s1 += buf[index++] & 0xff;
 			s2 += s1;
@@ -91,6 +94,7 @@ final public class Adler32 implements Checksum {
 		s2 %= BASE;
 	}
 
+	@Override
 	public Adler32 copy() {
 		Adler32 foo = new Adler32();
 		foo.s1 = this.s1;

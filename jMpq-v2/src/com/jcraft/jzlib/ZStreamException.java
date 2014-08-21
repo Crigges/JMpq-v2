@@ -35,6 +35,8 @@
 package com.jcraft.jzlib;
 
 public class ZStreamException extends java.io.IOException {
+	private static final long serialVersionUID = -4733110211408919347L;
+
 	public ZStreamException() {
 		super();
 	}

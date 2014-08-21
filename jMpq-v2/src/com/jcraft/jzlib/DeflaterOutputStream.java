@@ -33,6 +33,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@SuppressWarnings("deprecation")
 public class DeflaterOutputStream extends FilterOutputStream {
 
 	protected final Deflater deflater;
@@ -81,11 +82,14 @@ public class DeflaterOutputStream extends FilterOutputStream {
 		this.close_out = close_out;
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		buf1[0] = (byte) (b & 0xff);
 		write(buf1, 0, 1);
 	}
 
+	
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (deflater.finished()) {
 			throw new IOException("finished");
@@ -110,6 +114,7 @@ public class DeflaterOutputStream extends FilterOutputStream {
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (!closed) {
 			finish();
@@ -144,6 +149,7 @@ public class DeflaterOutputStream extends FilterOutputStream {
 		return err;
 	}
 
+	@Override
 	public void flush() throws IOException {
 		if (syncFlush && !deflater.finished()) {
 			while (true) {

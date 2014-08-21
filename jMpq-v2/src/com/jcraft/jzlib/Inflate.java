@@ -34,9 +34,8 @@
 
 package com.jcraft.jzlib;
 
+@SuppressWarnings("deprecation")
 final class Inflate {
-
-	static final private int MAX_WBITS = 15; // 32K LZ77 window
 
 	// preset dictionary flag in zlib header
 	static final private int PRESET_DICT = 0x20;
@@ -52,15 +51,9 @@ final class Inflate {
 	static final private int Z_OK = 0;
 	static final private int Z_STREAM_END = 1;
 	static final private int Z_NEED_DICT = 2;
-	static final private int Z_ERRNO = -1;
 	static final private int Z_STREAM_ERROR = -2;
 	static final private int Z_DATA_ERROR = -3;
-	static final private int Z_MEM_ERROR = -4;
 	static final private int Z_BUF_ERROR = -5;
-	static final private int Z_VERSION_ERROR = -6;
-
-	static final private int METHOD = 0; // waiting for method byte
-	static final private int FLAG = 1; // waiting for flag byte
 	static final private int DICT4 = 2; // four dictionary check bytes to go
 	static final private int DICT3 = 3; // three dictionary check bytes to go
 	static final private int DICT2 = 4; // two dictionary check bytes to go
@@ -184,9 +177,8 @@ final class Inflate {
 		return Z_OK;
 	}
 
+	
 	int inflate(int f) {
-		int hold = 0;
-
 		int r;
 		int b;
 
@@ -726,6 +718,7 @@ final class Inflate {
 	}
 
 	class Return extends Exception {
+		private static final long serialVersionUID = 4521104198037734078L;
 		int r;
 
 		Return(int r) {
@@ -761,7 +754,6 @@ final class Inflate {
 		if (tmp_string == null) {
 			tmp_string = new java.io.ByteArrayOutputStream();
 		}
-		int b = 0;
 		while (this.need > 0) {
 			if (z.avail_in == 0) {
 				throw new Return(r);
@@ -770,7 +762,6 @@ final class Inflate {
 			r = f;
 			z.avail_in--;
 			z.total_in++;
-			b = z.next_in[z.next_in_index];
 			tmp_string.write(z.next_in, z.next_in_index, 1);
 			z.adler.update(z.next_in, z.next_in_index, 1);
 			z.next_in_index++;

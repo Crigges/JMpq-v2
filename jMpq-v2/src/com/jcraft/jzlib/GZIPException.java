@@ -35,6 +35,8 @@
 package com.jcraft.jzlib;
 
 public class GZIPException extends java.io.IOException {
+	private static final long serialVersionUID = -6716347913454781761L;
+
 	public GZIPException() {
 		super();
 	}

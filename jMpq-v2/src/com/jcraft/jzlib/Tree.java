@@ -36,8 +36,8 @@ package com.jcraft.jzlib;
 
 final class Tree {
 	static final private int MAX_BITS = 15;
-	static final private int BL_CODES = 19;
-	static final private int D_CODES = 30;
+	@SuppressWarnings("unused") static final private int BL_CODES = 19;
+	@SuppressWarnings("unused") static final private int D_CODES = 30;
 	static final private int LITERALS = 256;
 	static final private int LENGTH_CODES = 29;
 	static final private int L_CODES = (LITERALS + 1 + LENGTH_CODES);
