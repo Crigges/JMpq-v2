@@ -14,72 +14,78 @@ import com.google.common.io.LittleEndianDataInputStream;
 public class BlockTable {
 	Block[] content;
 	HashMap<MpqFile, Block> ht = new HashMap<>();
-	
-	public BlockTable(byte[] arr, int blockPos, int blockSize) throws IOException{
-		
+
+	public BlockTable(byte[] arr, int blockPos, int blockSize)
+			throws IOException {
+
 		MpqCrypto c = new MpqCrypto();
-		
-		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16*blockSize).order(ByteOrder.LITTLE_ENDIAN);
-		
-		byte[] decrypted = c.decryptBlock(buf, 16*blockSize, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
-		
-		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
-		
+
+		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16 * blockSize).order(
+				ByteOrder.LITTLE_ENDIAN);
+
+		byte[] decrypted = c.decryptBlock(buf, 16 * blockSize,
+				MpqCrypto.MPQ_KEY_BLOCK_TABLE);
+
+		DataInput in = new LittleEndianDataInputStream(
+				new ByteArrayInputStream(decrypted));
+
 		content = new Block[blockSize];
-		
-		for(int i=0; i<blockSize; i++) {
+
+		for (int i = 0; i < blockSize; i++) {
 			content[i] = new Block(in);
 		}
 	}
-	
-	public BlockTable(LinkedList<MpqFile> files, int size){
+
+	public BlockTable(LinkedList<MpqFile> files, int size) {
 		content = new Block[size];
 		int c = 0;
-		for(MpqFile f: files){
-			content[c] = new Block(f.getOffset(), f.getCompSize(), f.getNormalSize(), MpqFile.COMPRESSED | MpqFile.EXISTS);
+		for (MpqFile f : files) {
+			content[c] = new Block(f.getOffset(), f.getCompSize(),
+					f.getNormalSize(), MpqFile.COMPRESSED | MpqFile.EXISTS);
 			ht.put(f, content[c]);
 			f.setBlockIndex(c);
 			c++;
 		}
-		while(c < size){
+		while (c < size) {
 			content[c] = new Block(0, 0, 0, 0);
 			c++;
 		}
 	}
-	
-	public void writeToFile(FileOutputStream out) throws IOException{
+
+	public void writeToFile(FileOutputStream out) throws IOException {
 		byte[] temp = new byte[content.length * 16];
 		int i = 0;
-		for(Block b : content){
+		for (Block b : content) {
 			System.arraycopy(b.asByteArray(), 0, temp, i * 16, 16);
 			i++;
 		}
 		MpqCrypto crypt = new MpqCrypto();
-		temp = crypt.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
+		temp = crypt.encryptMpqBlock(temp, temp.length,
+				MpqCrypto.MPQ_KEY_BLOCK_TABLE);
 		out.write(temp);
 	}
-	
-	public Block getBlockAtPos(int pos) throws JMpqException{
+
+	public Block getBlockAtPos(int pos) throws JMpqException {
 		try {
 			return content[pos];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new JMpqException("Invaild block position");
 		}
 	}
-	
-	public class Block{
+
+	public class Block {
 		private int filePos;
 		private int compressedSize;
 		private int normalSize;
 		private int flags;
 
-		public Block(DataInput in) throws IOException{
+		public Block(DataInput in) throws IOException {
 			filePos = in.readInt();
 			compressedSize = in.readInt();
 			normalSize = in.readInt();
 			flags = in.readInt();
 		}
-		
+
 		public Block(int filePos, int compressedSize, int normalSize, int flags) {
 			super();
 			this.filePos = filePos;
@@ -87,8 +93,8 @@ public class BlockTable {
 			this.normalSize = normalSize;
 			this.flags = flags;
 		}
-		
-		public byte[] asByteArray(){
+
+		public byte[] asByteArray() {
 			byte[] temp = new byte[16];
 			ByteBuffer bb = ByteBuffer.allocate(16);
 			bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -100,7 +106,7 @@ public class BlockTable {
 			bb.get(temp);
 			return temp;
 		}
-		
+
 		public int getFilePos() {
 			return filePos;
 		}
@@ -123,8 +129,7 @@ public class BlockTable {
 					+ compressedSize + ", normalSize=" + normalSize
 					+ ", flags=" + flags + "]";
 		}
-		
-		
+
 	}
 
 }

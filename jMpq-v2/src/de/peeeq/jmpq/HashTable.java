@@ -1,4 +1,5 @@
 package de.peeeq.jmpq;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.FileOutputStream;
@@ -12,39 +13,46 @@ import com.google.common.io.LittleEndianDataInputStream;
 
 import de.peeeq.jmpq.BlockTable.Block;
 
-
 public class HashTable {
 	private MpqCrypto c;
 	private int hashSize;
 	private Entry[] content;
-	public HashTable(byte[] arr, int hashPos, int hashSize) throws IOException{
+
+	public HashTable(byte[] arr, int hashPos, int hashSize) throws IOException {
 		this.hashSize = hashSize;
 		content = new Entry[hashSize];
 		c = new MpqCrypto();
-		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16*hashSize).order(ByteOrder.LITTLE_ENDIAN);
-		byte[] decrypted = c.decryptBlock(buf, 16*hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
-		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted)); 
-		for(int i=0; i<hashSize; i++) {
+		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16 * hashSize).order(
+				ByteOrder.LITTLE_ENDIAN);
+		byte[] decrypted = c.decryptBlock(buf, 16 * hashSize,
+				MpqCrypto.MPQ_KEY_HASH_TABLE);
+		DataInput in = new LittleEndianDataInputStream(
+				new ByteArrayInputStream(decrypted));
+		for (int i = 0; i < hashSize; i++) {
 			content[i] = new Entry(in);
-			if(content[i].wPlatform == 0) {
+			if (content[i].wPlatform == 0) {
 			}
 		}
 	}
-	
-	public static void writeNewHashTable(LinkedList<MpqFile> files, HashMap<MpqFile, Block> blockForFile, int size, FileOutputStream out, HashTable orginal) throws IOException, JMpqException{
+
+	public static void writeNewHashTable(LinkedList<MpqFile> files,
+			HashMap<MpqFile, Block> blockForFile, int size,
+			FileOutputStream out, HashTable orginal) throws IOException,
+			JMpqException {
 		Entry[] content = new Entry[size];
-		for(int i = 0; i < size; i++){
+		for (int i = 0; i < size; i++) {
 			content[i] = new Entry(-1, -1, -1, -1, -1);
 		}
 		MpqCrypto c = new MpqCrypto();
-		for(MpqFile f : files){
+		for (MpqFile f : files) {
 			int index = c.hash(f.getName(), MpqCrypto.MPQ_HASH_TABLE_INDEX);
 			int name1 = c.hash(f.getName(), MpqCrypto.MPQ_HASH_NAME_A);
 			int name2 = c.hash(f.getName(), MpqCrypto.MPQ_HASH_NAME_B);
 			int start = index & (size - 1);
-			while(true){
-				if(content[start].wPlatform == -1){
-					content[start] = new Entry(name1, name2, 0, 0, f.getBlockIndex()); 
+			while (true) {
+				if (content[start].wPlatform == -1) {
+					content[start] = new Entry(name1, name2, 0, 0,
+							f.getBlockIndex());
 					break;
 				}
 				start++;
@@ -53,24 +61,26 @@ public class HashTable {
 		}
 		byte[] temp = new byte[size * 4 * 4];
 		int i = 0;
-		for(Entry e : content){
+		for (Entry e : content) {
 			System.arraycopy(e.asByteArray(), 0, temp, i * 16, 16);
 			i++;
 		}
-		temp = c.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_HASH_TABLE);
+		temp = c.encryptMpqBlock(temp, temp.length,
+				MpqCrypto.MPQ_KEY_HASH_TABLE);
 		new HashTable(temp, 0, size);
 		out.write(temp);
 	}
-	
-	public int getBlockIndexOfFile(String name) throws JMpqException{
+
+	public int getBlockIndexOfFile(String name) throws JMpqException {
 		int index = c.hash(name, MpqCrypto.MPQ_HASH_TABLE_INDEX);
 		int name1 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_A);
 		int name2 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_B);
 		int start = index & (hashSize - 1);
-		for(int c = 0; c <= hashSize; c++){
-			if(content[start].dwName1 == name1 && content[start].dwName2 == name2){
+		for (int c = 0; c <= hashSize; c++) {
+			if (content[start].dwName1 == name1
+					&& content[start].dwName2 == name2) {
 				return content[start].dwBlockIndex;
-			}else if(content[start].wPlatform != 0){
+			} else if (content[start].wPlatform != 0) {
 				throw new JMpqException("File Not Found");
 			}
 			start %= hashSize;
@@ -78,15 +88,16 @@ public class HashTable {
 		}
 		throw new JMpqException("File Not Found");
 	}
-	
-	public static class Entry{
+
+	public static class Entry {
 		private int dwName1;
 		private int dwName2;
 		private int lcLocale;
 		private int wPlatform;
 		private int dwBlockIndex;
-		
-		public Entry(int dwName1, int dwName2, int lcLocale, int wPlatform, int dwBlockIndex) {
+
+		public Entry(int dwName1, int dwName2, int lcLocale, int wPlatform,
+				int dwBlockIndex) {
 			this.dwName1 = dwName1;
 			this.dwName2 = dwName2;
 			this.lcLocale = lcLocale;
@@ -101,8 +112,8 @@ public class HashTable {
 			this.wPlatform = in.readUnsignedShort();
 			this.dwBlockIndex = in.readInt();
 		}
-		
-		public byte[] asByteArray(){
+
+		public byte[] asByteArray() {
 			byte[] temp = new byte[16];
 			ByteBuffer bb = ByteBuffer.allocate(16);
 			bb.order(ByteOrder.LITTLE_ENDIAN);
