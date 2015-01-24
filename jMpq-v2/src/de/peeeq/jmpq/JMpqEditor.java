@@ -20,7 +20,7 @@ import de.peeeq.jmpq.BlockTable.Block;
  *  Some basic basic pure java based mpq implementation to open and modify warcraft 3 archives.
  *  Any bugs report here: https://github.com/Crigges/JMpq-v2/issues/new 
  */
-public class JMpqEditor {
+public class JMpqEditor implements AutoCloseable {
 	private byte[] fileAsArray;
 	private File mpq;
 	//Header
@@ -37,6 +37,7 @@ public class JMpqEditor {
 	private BlockTable blockTable;
 	private Listfile listFile;
 	private HashMap<String, MpqFile> filesByName = new HashMap<>();
+	private boolean useBestCompression = false;
 	
 	
 	/**
@@ -350,7 +351,14 @@ public class JMpqEditor {
 				+ ", hashSize=" + hashSize + ", blockSize=" + blockSize
 				+ ", hashMap=" + hashTable + "]";
 	}
+
+	@Override
+	public void close() throws Exception {
+		close(useBestCompression);
+	}
 	
-	
+	public void setUseBestCompression(boolean useBestCompression) {
+		this.useBestCompression = useBestCompression;
+	}
 	
 }
