@@ -23,12 +23,13 @@ public class BlockTable {
 
 		byte[] decrypted = c.decryptBlock(buf, 16 * blockSize, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
 
-		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
+		try (LittleEndianDataInputStream in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted))) {
 
-		content = new Block[blockSize];
+			content = new Block[blockSize];
 
-		for (int i = 0; i < blockSize; i++) {
-			content[i] = new Block(in);
+			for (int i = 0; i < blockSize; i++) {
+				content[i] = new Block(in);
+			}
 		}
 	}
 

@@ -57,25 +57,26 @@ public class JMpqEditor implements AutoCloseable {
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-		DataInput reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32));
+		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32))) {
 
-		String startString = readString(reader, 4);
-		if (!startString.equals("MPQ" + ((char) 0x1A))) {
-			throw new JMpqException("Invaild file format or damaged mpq");
+			String startString = readString(reader, 4);
+			if (!startString.equals("MPQ" + ((char) 0x1A))) {
+				throw new JMpqException("Invaild file format or damaged mpq");
+			}
+			// read header
+			headerSize = reader.readInt();
+			archiveSize = reader.readInt();
+			formatVersion = reader.readUnsignedShort();
+			discBlockSize = 512 * (1 << reader.readUnsignedShort()); // don't remove
+																		// that peq,
+																		// it is
+																		// important
+																		// :D
+			hashPos = reader.readInt();
+			blockPos = reader.readInt();
+			hashSize = reader.readInt();
+			blockSize = reader.readInt();
 		}
-		// read header
-		headerSize = reader.readInt();
-		archiveSize = reader.readInt();
-		formatVersion = reader.readUnsignedShort();
-		discBlockSize = 512 * (1 << reader.readUnsignedShort()); // don't remove
-																	// that peq,
-																	// it is
-																	// important
-																	// :D
-		hashPos = reader.readInt();
-		blockPos = reader.readInt();
-		hashSize = reader.readInt();
-		blockSize = reader.readInt();
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 		File temp = File.createTempFile("list", "file");
@@ -115,25 +116,26 @@ public class JMpqEditor implements AutoCloseable {
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-		DataInput reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32));
+		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32))) {
 
-		String startString = readString(reader, 4);
-		if (!startString.equals("MPQ" + ((char) 0x1A))) {
-			throw new JMpqException("Invaild file format or damaged mpq");
+			String startString = readString(reader, 4);
+			if (!startString.equals("MPQ" + ((char) 0x1A))) {
+				throw new JMpqException("Invaild file format or damaged mpq");
+			}
+			// read header
+			headerSize = reader.readInt();
+			archiveSize = reader.readInt();
+			formatVersion = reader.readUnsignedShort();
+			discBlockSize = 512 * (1 << reader.readUnsignedShort()); // don't remove
+																		// that peq,
+																		// it is
+																		// important
+																		// :D
+			hashPos = reader.readInt();
+			blockPos = reader.readInt();
+			hashSize = reader.readInt();
+			blockSize = reader.readInt();
 		}
-		// read header
-		headerSize = reader.readInt();
-		archiveSize = reader.readInt();
-		formatVersion = reader.readUnsignedShort();
-		discBlockSize = 512 * (1 << reader.readUnsignedShort()); // don't remove
-																	// that peq,
-																	// it is
-																	// important
-																	// :D
-		hashPos = reader.readInt();
-		blockPos = reader.readInt();
-		hashSize = reader.readInt();
-		blockSize = reader.readInt();
 		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 		File temp = File.createTempFile("list", "file");
@@ -267,15 +269,13 @@ public class JMpqEditor implements AutoCloseable {
 		// offsets -> Generate Blocktable -> Generate Hastable -> Write
 		// HashTable -> Write BlockTable
 		boolean rebuild = bestCompression & discBlockSize != (512 * (1 << 10));
-		File temp = null;
-		FileOutputStream out = null;
+		File temp;
 		try {
 			temp = File.createTempFile("war", "mpq");
-			out = new FileOutputStream(temp);
 		} catch (IOException e) {
 			throw new JMpqException("Could not create buildfile, reason: " + e.getCause());
 		}
-		try {
+		try (FileOutputStream out = new FileOutputStream(temp)) {
 			// Write start offset
 			out.write(fileAsArray, 0, 512);
 			// Calculate Header
@@ -353,11 +353,6 @@ public class JMpqEditor implements AutoCloseable {
 			throw new JMpqException("Could not write buildfile, reason: " + e.getCause());
 		}
 		try {
-			out.close();
-		} catch (IOException e) {
-			throw new JMpqException("Could not finalize buildfile: " + e.getCause());
-		}
-		try {
 			mpq.delete();
 			com.google.common.io.Files.copy(temp, mpq);
 		} catch (IOException e) {
@@ -385,7 +380,7 @@ public class JMpqEditor implements AutoCloseable {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() throws JMpqException {
 		close(useBestCompression);
 	}
 

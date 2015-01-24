@@ -24,10 +24,11 @@ public class HashTable {
 		c = new MpqCrypto();
 		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16 * hashSize).order(ByteOrder.LITTLE_ENDIAN);
 		byte[] decrypted = c.decryptBlock(buf, 16 * hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
-		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
-		for (int i = 0; i < hashSize; i++) {
-			content[i] = new Entry(in);
-			if (content[i].wPlatform == 0) {
+		try (LittleEndianDataInputStream in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted))) {
+			for (int i = 0; i < hashSize; i++) {
+				content[i] = new Entry(in);
+				if (content[i].wPlatform == 0) {
+				}
 			}
 		}
 	}
@@ -60,7 +61,8 @@ public class HashTable {
 			i++;
 		}
 		temp = c.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_HASH_TABLE);
-		new HashTable(temp, 0, size);
+		@SuppressWarnings("unused") // TODO maybe rewrite this, so that no constructor is needed
+		HashTable ht = new HashTable(temp, 0, size);
 		out.write(temp);
 	}
 
