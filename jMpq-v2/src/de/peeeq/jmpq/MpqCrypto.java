@@ -73,8 +73,7 @@ public class MpqCrypto {
 	public byte[] decryptBlock(ByteBuffer buf, int length, int key) {
 		int seed = 0xEEEEEEEE;
 
-		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(
-				ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
 
 		// Round to longs
 		length >>= 2;
@@ -93,8 +92,7 @@ public class MpqCrypto {
 	}
 
 	public byte[] encryptMpqBlock(ByteBuffer buf, int length, int dwKey1) {
-		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(
-				ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer resultBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
 		int dwValue32;
 		int dwKey2 = 0xEEEEEEEE;
 
@@ -119,10 +117,8 @@ public class MpqCrypto {
 		MpqCrypto c = new MpqCrypto();
 
 		byte[] bytes = "Hello World!".getBytes();
-		byte[] a = c.encryptMpqBlock(ByteBuffer.wrap(bytes), bytes.length,
-				MPQ_KEY_HASH_TABLE);
-		byte[] b = c.decryptBlock(ByteBuffer.wrap(a), bytes.length,
-				MPQ_KEY_HASH_TABLE);
+		byte[] a = c.encryptMpqBlock(ByteBuffer.wrap(bytes), bytes.length, MPQ_KEY_HASH_TABLE);
+		byte[] b = c.decryptBlock(ByteBuffer.wrap(a), bytes.length, MPQ_KEY_HASH_TABLE);
 
 		System.out.println("orig = " + Arrays.toString(bytes));
 		System.out.println("a = " + Arrays.toString(a));
@@ -131,9 +127,7 @@ public class MpqCrypto {
 	}
 
 	public byte[] encryptMpqBlock(byte[] bytes, int length, int key) {
-		return encryptMpqBlock(
-				ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN), length,
-				key);
+		return encryptMpqBlock(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN), length, key);
 	}
 
 }

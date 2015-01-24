@@ -22,12 +22,9 @@ public class HashTable {
 		this.hashSize = hashSize;
 		content = new Entry[hashSize];
 		c = new MpqCrypto();
-		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16 * hashSize).order(
-				ByteOrder.LITTLE_ENDIAN);
-		byte[] decrypted = c.decryptBlock(buf, 16 * hashSize,
-				MpqCrypto.MPQ_KEY_HASH_TABLE);
-		DataInput in = new LittleEndianDataInputStream(
-				new ByteArrayInputStream(decrypted));
+		ByteBuffer buf = ByteBuffer.wrap(arr, hashPos, 16 * hashSize).order(ByteOrder.LITTLE_ENDIAN);
+		byte[] decrypted = c.decryptBlock(buf, 16 * hashSize, MpqCrypto.MPQ_KEY_HASH_TABLE);
+		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 		for (int i = 0; i < hashSize; i++) {
 			content[i] = new Entry(in);
 			if (content[i].wPlatform == 0) {
@@ -35,10 +32,8 @@ public class HashTable {
 		}
 	}
 
-	public static void writeNewHashTable(LinkedList<MpqFile> files,
-			HashMap<MpqFile, Block> blockForFile, int size,
-			FileOutputStream out, HashTable orginal) throws IOException,
-			JMpqException {
+	public static void writeNewHashTable(LinkedList<MpqFile> files, HashMap<MpqFile, Block> blockForFile, int size,
+			FileOutputStream out, HashTable orginal) throws IOException, JMpqException {
 		Entry[] content = new Entry[size];
 		for (int i = 0; i < size; i++) {
 			content[i] = new Entry(-1, -1, -1, -1, -1);
@@ -51,8 +46,7 @@ public class HashTable {
 			int start = index & (size - 1);
 			while (true) {
 				if (content[start].wPlatform == -1) {
-					content[start] = new Entry(name1, name2, 0, 0,
-							f.getBlockIndex());
+					content[start] = new Entry(name1, name2, 0, 0, f.getBlockIndex());
 					break;
 				}
 				start++;
@@ -65,8 +59,7 @@ public class HashTable {
 			System.arraycopy(e.asByteArray(), 0, temp, i * 16, 16);
 			i++;
 		}
-		temp = c.encryptMpqBlock(temp, temp.length,
-				MpqCrypto.MPQ_KEY_HASH_TABLE);
+		temp = c.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_HASH_TABLE);
 		new HashTable(temp, 0, size);
 		out.write(temp);
 	}
@@ -77,8 +70,7 @@ public class HashTable {
 		int name2 = c.hash(name, MpqCrypto.MPQ_HASH_NAME_B);
 		int start = index & (hashSize - 1);
 		for (int c = 0; c <= hashSize; c++) {
-			if (content[start].dwName1 == name1
-					&& content[start].dwName2 == name2) {
+			if (content[start].dwName1 == name1 && content[start].dwName2 == name2) {
 				return content[start].dwBlockIndex;
 			} else if (content[start].wPlatform != 0) {
 				throw new JMpqException("File Not Found");
@@ -96,8 +88,7 @@ public class HashTable {
 		private int wPlatform;
 		private int dwBlockIndex;
 
-		public Entry(int dwName1, int dwName2, int lcLocale, int wPlatform,
-				int dwBlockIndex) {
+		public Entry(int dwName1, int dwName2, int lcLocale, int wPlatform, int dwBlockIndex) {
 			this.dwName1 = dwName1;
 			this.dwName2 = dwName2;
 			this.lcLocale = lcLocale;
@@ -129,9 +120,8 @@ public class HashTable {
 
 		@Override
 		public String toString() {
-			return "Entry [dwName1=" + dwName1 + ",	dwName2=" + dwName2
-					+ ",	lcLocale=" + lcLocale + ",	wPlatform=" + wPlatform
-					+ ",	dwBlockIndex=" + dwBlockIndex + "]";
+			return "Entry [dwName1=" + dwName1 + ",	dwName2=" + dwName2 + ",	lcLocale=" + lcLocale + ",	wPlatform="
+					+ wPlatform + ",	dwBlockIndex=" + dwBlockIndex + "]";
 		}
 	}
 }

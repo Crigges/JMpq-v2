@@ -15,19 +15,15 @@ public class BlockTable {
 	Block[] content;
 	HashMap<MpqFile, Block> ht = new HashMap<>();
 
-	public BlockTable(byte[] arr, int blockPos, int blockSize)
-			throws IOException {
+	public BlockTable(byte[] arr, int blockPos, int blockSize) throws IOException {
 
 		MpqCrypto c = new MpqCrypto();
 
-		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16 * blockSize).order(
-				ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16 * blockSize).order(ByteOrder.LITTLE_ENDIAN);
 
-		byte[] decrypted = c.decryptBlock(buf, 16 * blockSize,
-				MpqCrypto.MPQ_KEY_BLOCK_TABLE);
+		byte[] decrypted = c.decryptBlock(buf, 16 * blockSize, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
 
-		DataInput in = new LittleEndianDataInputStream(
-				new ByteArrayInputStream(decrypted));
+		DataInput in = new LittleEndianDataInputStream(new ByteArrayInputStream(decrypted));
 
 		content = new Block[blockSize];
 
@@ -40,8 +36,8 @@ public class BlockTable {
 		content = new Block[size];
 		int c = 0;
 		for (MpqFile f : files) {
-			content[c] = new Block(f.getOffset(), f.getCompSize(),
-					f.getNormalSize(), MpqFile.COMPRESSED | MpqFile.EXISTS);
+			content[c] = new Block(f.getOffset(), f.getCompSize(), f.getNormalSize(), MpqFile.COMPRESSED
+					| MpqFile.EXISTS);
 			ht.put(f, content[c]);
 			f.setBlockIndex(c);
 			c++;
@@ -60,8 +56,7 @@ public class BlockTable {
 			i++;
 		}
 		MpqCrypto crypt = new MpqCrypto();
-		temp = crypt.encryptMpqBlock(temp, temp.length,
-				MpqCrypto.MPQ_KEY_BLOCK_TABLE);
+		temp = crypt.encryptMpqBlock(temp, temp.length, MpqCrypto.MPQ_KEY_BLOCK_TABLE);
 		out.write(temp);
 	}
 
@@ -125,8 +120,7 @@ public class BlockTable {
 
 		@Override
 		public String toString() {
-			return "Block [filePos=" + filePos + ", compressedSize="
-					+ compressedSize + ", normalSize=" + normalSize
+			return "Block [filePos=" + filePos + ", compressedSize=" + compressedSize + ", normalSize=" + normalSize
 					+ ", flags=" + flags + "]";
 		}
 

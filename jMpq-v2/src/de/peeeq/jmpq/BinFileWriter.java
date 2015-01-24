@@ -40,18 +40,15 @@ public class BinFileWriter implements Closeable {
 	}
 
 	public void writeInt(int i) throws IOException {
-		writeBytes(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-				.putInt(i).array());
+		writeBytes(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(i).array());
 	}
 
 	public void writeShort(short i) throws IOException {
-		writeBytes(ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN)
-				.putShort(i).array());
+		writeBytes(ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(i).array());
 	}
 
 	public void writeFloat(float f) throws IOException {
-		writeBytes(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-				.putFloat(f).array());
+		writeBytes(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(f).array());
 	}
 
 	public void writeFourchar(String s) throws IOException {
