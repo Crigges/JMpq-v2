@@ -72,11 +72,19 @@ public class JMpqEditor {
 		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
 		File temp = File.createTempFile("list", "file");
 		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
-		MpqFile f = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), b, discBlockSize, "(listfile)");
+		byte[] fileAsArrayWithoutHeader = Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length);
+		MpqFile f = new MpqFile(fileAsArrayWithoutHeader, b, discBlockSize, "(listfile)");
 		f.extractToFile(temp);
 		listFile = new Listfile(java.nio.file.Files.readAllBytes(temp.toPath())); 
 		for(String s : listFile.getFiles()){
-			filesByName.put(s, new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(s)), discBlockSize, s));
+			try {
+				int blockIndex = hashTable.getBlockIndexOfFile(s);
+				Block block = blockTable.getBlockAtPos(blockIndex);
+				filesByName.put(s, new MpqFile(fileAsArrayWithoutHeader, block, discBlockSize, s));
+			} catch (IOException e) {
+				System.err.println("Problem with opening file " + s + " in mpq:");
+				e.printStackTrace();
+			}
 		}
 		listFile.addFile("(listfile)");
 		filesByName.put("(listfile)", f);
