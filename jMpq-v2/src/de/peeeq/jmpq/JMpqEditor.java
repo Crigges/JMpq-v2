@@ -39,7 +39,8 @@ public class JMpqEditor implements AutoCloseable {
 	private Listfile listFile;
 	private HashMap<String, MpqFile> filesByName = new HashMap<>();
 	private boolean useBestCompression = false;
-
+	private boolean readOnlyMode = false;
+	
 	/**
 	 * Creates a new editor by parsing an exisiting mpq.
 	 * 
@@ -110,6 +111,7 @@ public class JMpqEditor implements AutoCloseable {
 	 *             if access problems occcur
 	 */
 	public JMpqEditor(File mpq, boolean readonlyMode) throws JMpqException, IOException {
+		this.readOnlyMode = true;
 		this.mpq = mpq;
 		try {
 			fileAsArray = Files.readAllBytes(mpq.toPath());
@@ -160,6 +162,9 @@ public class JMpqEditor implements AutoCloseable {
 	 *             if file can't be read
 	 */
 	public void insertFile(File source, String archiveName) throws JMpqException {
+		if (readOnlyMode){
+			throw new JMpqException("Can't insert files in read only mode");
+		}
 		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
 		listFile.addFile(archiveName);
 		filesByName.put(archiveName, f);
@@ -176,6 +181,9 @@ public class JMpqEditor implements AutoCloseable {
 	 * @throws JMpqException
 	 */
 	public void insertFile(byte[] source, String archiveName) throws JMpqException {
+		if (readOnlyMode){
+			throw new JMpqException("Can't insert files in read only mode");
+		}
 		MpqFile f = new MpqFile(source, archiveName, discBlockSize);
 		listFile.addFile(archiveName);
 		filesByName.put(archiveName, f);
@@ -190,6 +198,9 @@ public class JMpqEditor implements AutoCloseable {
 	 *             if file is not found
 	 */
 	public void deleteFile(String name) throws JMpqException {
+		if (readOnlyMode){
+			throw new JMpqException("Can't delete files in read only mode");
+		}
 		MpqFile f = filesByName.get(name);
 		if (f != null) {
 			listFile.removeFile(name);
@@ -210,7 +221,7 @@ public class JMpqEditor implements AutoCloseable {
 	 *             if file is not found or access errors occur
 	 */
 	public void extractFile(String name, File dest) throws JMpqException {
-		try {
+		try { 
 			MpqFile f = filesByName.get(name);
 			if (f != null) {
 				f.extractToFile(dest);
@@ -369,7 +380,11 @@ public class JMpqEditor implements AutoCloseable {
 	 *             if an error while writing occurs
 	 */
 	public void close(boolean bestCompression) throws JMpqException {
-		build(bestCompression);
+		if (readOnlyMode){
+			return;
+		}else{
+			build(bestCompression);
+		}
 	}
 
 	@Override
@@ -381,7 +396,11 @@ public class JMpqEditor implements AutoCloseable {
 
 	@Override
 	public void close() throws JMpqException {
-		close(useBestCompression);
+		if (readOnlyMode){
+			return;
+		}else{
+			close(useBestCompression);
+		}
 	}
 
 	public void setUseBestCompression(boolean useBestCompression) {
