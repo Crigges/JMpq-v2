@@ -145,9 +145,12 @@ public class MpqFile {
 		int sectorCount = (int) (Math.ceil(((double) normalSize / (double) sectorSize)) + 1);
 		MpqCrypto crypto = null;
 		int baseKey = 0;
+		int sepIndex = name.lastIndexOf('\\');
+		String pathlessName = name.substring(sepIndex + 1);
+		System.out.println("pathless" + pathlessName);
 		if ((b.getFlags() & ENCRYPTED) == ENCRYPTED) {
 			crypto = new MpqCrypto();
-			baseKey = crypto.hash(name, MpqCrypto.MPQ_HASH_FILE_KEY);
+			baseKey = crypto.hash(pathlessName, MpqCrypto.MPQ_HASH_FILE_KEY);
 			if ((b.getFlags() & ADJUSTED_ENCRYPTED) == ADJUSTED_ENCRYPTED) {
 				baseKey = ((baseKey + b.getFilePos()) ^ b.getNormalSize());
 			}
@@ -169,6 +172,10 @@ public class MpqFile {
 			int finalSize = 0;
 			for (int i = 0; i < sectorCount - 1; i++) {
 				if (b.getNormalSize() - finalSize <= sectorSize) {
+					System.out.println(b.getFilePos());
+					System.out.println(normalSize);
+					System.out.println(name);
+					System.out.println("start = " + start + "   end = " + end);
 					byte[] temp = new byte[end - start];
 					System.arraycopy(fileAsArray, b.getFilePos() + start, temp, 0, temp.length);
 					try {
@@ -180,7 +187,8 @@ public class MpqFile {
 				} else {
 					byte[] temp = new byte[end - start];
 					System.arraycopy(fileAsArray, b.getFilePos() + start, temp, 0, temp.length);
-					sectors[i] = new Sector(temp, end - start, sectorSize, crypto, baseKey);
+					sectors[i] = new Sector(temp, end - start, sectorSize, crypto, baseKey + i);
+					
 				}
 				finalSize += sectorSize;
 				start = end;
@@ -191,7 +199,10 @@ public class MpqFile {
 				}
 			}
 		} else {
-			throw new JMpqException("Uncompressed File");
+			sectors = new Sector[1];
+			byte[] temp = new byte[compSize];
+			System.arraycopy(fileAsArray, b.getFilePos(), temp, 0, temp.length);
+			sectors[0] = new Sector(temp, compSize, normalSize, crypto, baseKey);
 		}
 	}
 

@@ -24,6 +24,7 @@ import de.peeeq.jmpq.BlockTable.Block;
 public class JMpqEditor implements AutoCloseable {
 	private byte[] fileAsArray;
 	private File mpq;
+	private int headerOffset = -1;
 	// Header
 	private int headerSize;
 	private int archiveSize;
@@ -58,7 +59,8 @@ public class JMpqEditor implements AutoCloseable {
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32))) {
+		calcHeaderOffset();
+		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, headerOffset, 32))) {
 
 			String startString = readString(reader, 4);
 			if (!startString.equals("MPQ" + ((char) 0x1A))) {
@@ -78,11 +80,11 @@ public class JMpqEditor implements AutoCloseable {
 			hashSize = reader.readInt();
 			blockSize = reader.readInt();
 		}
-		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
-		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
+		hashTable = new HashTable(fileAsArray, hashPos  + headerOffset, hashSize);
+		blockTable = new BlockTable(fileAsArray, blockPos  + headerOffset, blockSize);
 		File temp = File.createTempFile("list", "file");
 		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
-		byte[] fileAsArrayWithoutHeader = Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length);
+		byte[] fileAsArrayWithoutHeader = Arrays.copyOfRange(fileAsArray, headerOffset, fileAsArray.length);
 		MpqFile f = new MpqFile(fileAsArrayWithoutHeader, b, discBlockSize, "(listfile)");
 		f.extractToFile(temp);
 		listFile = new Listfile(java.nio.file.Files.readAllBytes(temp.toPath()));
@@ -118,7 +120,8 @@ public class JMpqEditor implements AutoCloseable {
 		} catch (IOException e) {
 			throw new JMpqException("The target file does not exists");
 		}
-		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, 512, 32))) {
+		calcHeaderOffset();
+		try (LittleEndianDataInputStream reader = new LittleEndianDataInputStream(new ByteArrayInputStream(fileAsArray, headerOffset, 32))) {
 
 			String startString = readString(reader, 4);
 			if (!startString.equals("MPQ" + ((char) 0x1A))) {
@@ -138,16 +141,28 @@ public class JMpqEditor implements AutoCloseable {
 			hashSize = reader.readInt();
 			blockSize = reader.readInt();
 		}
-		hashTable = new HashTable(fileAsArray, hashPos + 512, hashSize);
-		blockTable = new BlockTable(fileAsArray, blockPos + 512, blockSize);
+		hashTable = new HashTable(fileAsArray, hashPos + headerOffset, hashSize);
+		blockTable = new BlockTable(fileAsArray, blockPos + headerOffset, blockSize);
 		File temp = File.createTempFile("list", "file");
 		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
-		MpqFile f = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length), b, discBlockSize,
-				"(listfile)");
+		byte[] fileAsArrayWithoutHeader = Arrays.copyOfRange(fileAsArray, headerOffset, fileAsArray.length);
+		MpqFile f = new MpqFile(fileAsArrayWithoutHeader, b, discBlockSize, "(listfile)");
 		f.extractToFile(temp);
 		listFile = new Listfile(Files.readAllBytes(temp.toPath()));
 		listFile.addFile("(listfile)");
 		filesByName.put("(listfile)", f);
+	}
+	
+	private void calcHeaderOffset() throws JMpqException{
+		for(int i = 0 ;0 < fileAsArray.length - 3; i += 512){
+			if((char)fileAsArray[i] == 'M' && (char)fileAsArray[i + 1] == 'P' && (char)fileAsArray[i + 2] == 'Q'){
+				headerOffset = i;
+				break;
+			}
+		}
+		if(headerOffset == -1){
+			throw new JMpqException("Invaild file format or damaged mpq");
+		}
 	}
 
 	/**
@@ -228,10 +243,11 @@ public class JMpqEditor implements AutoCloseable {
 
 			} else {
 				try {
-					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length),
+					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, headerOffset, fileAsArray.length),
 							blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name)), discBlockSize, name);
 					fil.extractToFile(dest);
 				} catch (Exception e) {
+					e.printStackTrace();
 					throw new JMpqException("Could not find file: " + name);
 				}
 			}
@@ -256,7 +272,7 @@ public class JMpqEditor implements AutoCloseable {
 				return f.asFileArray();
 			} else {
 				try {
-					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, 512, fileAsArray.length),
+					MpqFile fil = new MpqFile(Arrays.copyOfRange(fileAsArray, headerOffset, fileAsArray.length),
 							blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile(name)), discBlockSize, name);
 					return fil.asFileArray();
 				} catch (Exception e) {
@@ -288,7 +304,7 @@ public class JMpqEditor implements AutoCloseable {
 		}
 		try (FileOutputStream out = new FileOutputStream(temp)) {
 			// Write start offset
-			out.write(fileAsArray, 0, 512);
+			out.write(fileAsArray, 0, headerOffset);
 			// Calculate Header
 			// Get Hash and Block Table Size
 			int lines = listFile.getFiles().size() + 1;
