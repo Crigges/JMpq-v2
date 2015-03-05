@@ -143,14 +143,6 @@ public class JMpqEditor implements AutoCloseable {
 		}
 		hashTable = new HashTable(fileAsArray, hashPos + headerOffset, hashSize);
 		blockTable = new BlockTable(fileAsArray, blockPos + headerOffset, blockSize);
-		File temp = File.createTempFile("list", "file");
-		Block b = blockTable.getBlockAtPos(hashTable.getBlockIndexOfFile("(listfile)"));
-		byte[] fileAsArrayWithoutHeader = Arrays.copyOfRange(fileAsArray, headerOffset, fileAsArray.length);
-		MpqFile f = new MpqFile(fileAsArrayWithoutHeader, b, discBlockSize, "(listfile)");
-		f.extractToFile(temp);
-		listFile = new Listfile(Files.readAllBytes(temp.toPath()));
-		listFile.addFile("(listfile)");
-		filesByName.put("(listfile)", f);
 	}
 	
 	private void calcHeaderOffset() throws JMpqException{

@@ -7,9 +7,8 @@ public class Main {
 
 	public static void main(String[] args) throws JMpqException, IOException {
 		// before 118.052 bytes
-		JMpqEditor e = new JMpqEditor(new File("C:\\Users\\Crigges-Pc\\Desktop\\mpqedit\\War3.mpq"));
-		e.extractFile("TerrainArt\\LordaeronSummer\\Lords_Dirt.blp", new File("test.blp"));
-		e.extractFile("(listfile)", new File("listfile.txt"));
+		JMpqEditor e = new JMpqEditor(new File("C:\\Program Files (x86)\\Warcraft III\\war3patch.mpq"), true);
+		e.extractFile("Abilities\\Spells\\Other\\Transmute\\Sparkle_Anim128.blp", new File("test.blp"));
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e1) {
