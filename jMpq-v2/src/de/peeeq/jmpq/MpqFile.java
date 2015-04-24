@@ -70,7 +70,7 @@ public class MpqFile {
 		flags = COMPRESSED | EXISTS;
 	}
 
-	public MpqFile(byte[] arr, String name, int sectorSize) throws JMpqException {
+	public MpqFile(byte[] arr, String name, int sectorSize, int wurst) throws JMpqException {
 		normalSize = arr.length;
 		this.name = name;
 		this.sectorSize = sectorSize;
@@ -172,10 +172,6 @@ public class MpqFile {
 			int finalSize = 0;
 			for (int i = 0; i < sectorCount - 1; i++) {
 				if (b.getNormalSize() - finalSize <= sectorSize) {
-					System.out.println(b.getFilePos());
-					System.out.println(normalSize);
-					System.out.println(name);
-					System.out.println("start = " + start + "   end = " + end);
 					byte[] temp = new byte[end - start];
 					System.arraycopy(fileAsArray, b.getFilePos() + start, temp, 0, temp.length);
 					try {
@@ -251,7 +247,7 @@ public class MpqFile {
 	public class Sector {
 		boolean isCompressed = true;
 		byte compressionType;
-		byte[] contentUnCompressed;
+		byte[] contentUnCompressed = null;
 		byte[] contentCompressed;
 
 		public Sector(byte[] in, int sectorSize, int uncomSectorSize, MpqCrypto crypto, int key) throws IOException,
@@ -269,7 +265,7 @@ public class MpqFile {
 				System.arraycopy(in, 1, contentCompressed, 0, in.length - 1);
 				compressionType = in[0];
 				if (!((compressionType & 2) == 2)) {
-					throw new JMpqException("Unsupported compression algorithm: " + compressionType);
+					//throw new JMpqException("Unsupported compression algorithm: " + compressionType);
 				}
 				byte[] temp = new byte[sectorSize];
 				System.arraycopy(in, 1, temp, 0, sectorSize - 1);
@@ -277,7 +273,7 @@ public class MpqFile {
 			}
 		}
 
-		public Sector(byte[] data) {
+		public Sector(byte[] data, boolean test) {
 			contentUnCompressed = data;
 			try {
 				contentCompressed = JzLibHelper.deflate(data);
