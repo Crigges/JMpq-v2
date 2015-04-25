@@ -16,8 +16,6 @@ public class BlockTable {
 	HashMap<MpqFile, Block> ht = new HashMap<>();
 
 	public BlockTable(byte[] arr, int blockPos, int blockSize) throws IOException {
-		ByteBuffer b = ByteBuffer.allocate(4);
-		b.putInt(1234);
 		MpqCrypto c = new MpqCrypto();
 
 		ByteBuffer buf = ByteBuffer.wrap(arr, blockPos, 16 * blockSize).order(ByteOrder.LITTLE_ENDIAN);
